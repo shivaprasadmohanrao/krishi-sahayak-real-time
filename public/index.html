@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Farming Assistant - Voice Support for Indian Farmers</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="AI-powered farming assistant for Indian farmers - Get expert advice on crops, pests, soil health, and more">
+    <link rel="stylesheet" href="/src/style-enhanced.css">
+    <link rel="stylesheet" href="/src/voice-agent.css">
+    <script src="/socket.io/socket.io.js"></script>
+    <!-- jsPDF for PDF generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</head>
+
+<body>
+    <!-- Animated farming background -->
+    <div class="farming-background">
+        <div class="bg-layer layer-1"></div>
+        <div class="bg-layer layer-2"></div>
+        <div class="bg-layer layer-3"></div>
+    </div>
+
+    <!-- Header with branding -->
+    <header class="app-header">
+        <div class="header-content">
+            <!-- Jai Kissan Badge - Top Left -->
+            <div class="jai-kissan-badge">
+                <svg class="india-flag-icon" viewBox="0 0 24 16" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="24" height="5.33" fill="#FF9933"/>
+                    <rect y="5.33" width="24" height="5.33" fill="#FFFFFF"/>
+                    <rect y="10.67" width="24" height="5.33" fill="#138808"/>
+                    <circle cx="12" cy="8" r="2" fill="none" stroke="#000080" stroke-width="0.3"/>
+                    <circle cx="12" cy="8" r="0.5" fill="#000080"/>
+                </svg>
+                <div class="jai-text-group">
+                    <span class="jai-text-hindi">जय किसान!</span>
+                    <span class="jai-text-english">Jai Kisan!</span>
+                </div>
+            </div>
+            
+            <!-- Center Logo and Title -->
+            <div class="logo-section">
+                <div class="title-group">
+                    <h1 class="app-title">
+                        <span class="title-hindi">कृषि सहायक</span>
+                        <div class="logo-icon-center">
+                            <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="50" cy="50" r="48" fill="none" stroke="#000080" stroke-width="2"/>
+                                <circle cx="50" cy="50" r="42" fill="none" stroke="#000080" stroke-width="1.5"/>
+                                <circle cx="50" cy="50" r="8" fill="#000080"/>
+                                <g stroke="#000080" stroke-width="2" stroke-linecap="round">
+                                    <line x1="50" y1="50" x2="50" y2="10" />
+                                    <line x1="50" y1="50" x2="79.7" y2="20.3" />
+                                    <line x1="50" y1="50" x2="90" y2="50" />
+                                    <line x1="50" y1="50" x2="79.7" y2="79.7" />
+                                    <line x1="50" y1="50" x2="50" y2="90" />
+                                    <line x1="50" y1="50" x2="20.3" y2="79.7" />
+                                    <line x1="50" y1="50" x2="10" y2="50" />
+                                    <line x1="50" y1="50" x2="20.3" y2="20.3" />
+                                </g>
+                                <g stroke="#000080" stroke-width="1.5" stroke-linecap="round">
+                                    <line x1="50" y1="50" x2="64.85" y2="14.64" />
+                                    <line x1="50" y1="50" x2="85.36" y2="35.15" />
+                                    <line x1="50" y1="50" x2="85.36" y2="64.85" />
+                                    <line x1="50" y1="50" x2="64.85" y2="85.36" />
+                                    <line x1="50" y1="50" x2="35.15" y2="85.36" />
+                                    <line x1="50" y1="50" x2="14.64" y2="64.85" />
+                                    <line x1="50" y1="50" x2="14.64" y2="35.15" />
+                                    <line x1="50" y1="50" x2="35.15" y2="14.64" />
+                                    <line x1="50" y1="50" x2="57.32" y2="12.07" />
+                                    <line x1="50" y1="50" x2="73.48" y2="26.52" />
+                                    <line x1="50" y1="50" x2="87.93" y2="42.68" />
+                                    <line x1="50" y1="50" x2="87.93" y2="57.32" />
+                                    <line x1="50" y1="50" x2="73.48" y2="73.48" />
+                                    <line x1="50" y1="50" x2="57.32" y2="87.93" />
+                                    <line x1="50" y1="50" x2="42.68" y2="87.93" />
+                                    <line x1="50" y1="50" x2="26.52" y2="73.48" />
+                                    <line x1="50" y1="50" x2="12.07" y2="57.32" />
+                                    <line x1="50" y1="50" x2="12.07" y2="42.68" />
+                                    <line x1="50" y1="50" x2="26.52" y2="26.52" />
+                                    <line x1="50" y1="50" x2="42.68" y2="12.07" />
+                                </g>
+                            </svg>
+                        </div>
+                        <span class="title-english">Krishi Sahayak</span>
+                    </h1>
+                    <p class="app-subtitle">AI-Powered Farming Assistant for Indian Farmers</p>
+                </div>
+            </div>
+            
+            <!-- Live Date and Time Display - Top Right -->
+            <div class="datetime-display">
+                <div class="time-display" id="current-time">00:00:00</div>
+                <div class="date-display" id="current-date">Loading...</div>
+                <div class="timezone-display">IST</div>
+            </div>
+            
+            <!-- Help Button -->
+            <button id="help-btn" class="help-btn" title="Help & Guide">
+                <svg class="help-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                
+                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3v1"></path>
+                
+                <line x1="12" y1="17" x2="12" y2="17"></line>
+            </svg>
+            </button>
+        </div>
+        
+        <!-- Controls Row -->
+        <div class="controls-row">
+            <div class="header-controls">
+                <!-- Language Selector -->
+                <div class="control-group">
+                    <label for="language-select">Language:</label>
+                    <select id="language-select" class="styled-select">
+                        <option value="en">English</option>
+                        <option value="hi">हिंदी</option>
+                        <option value="it">Italian</option>
+                        <option value="fr">French</option>
+                        <option value="de">German</option>
+                        <option value="es">Spanish</option>
+                    </select>
+                </div>
+                
+                <!-- Response Style Selector -->
+                <div class="control-group">
+                    <label for="response-style">Response:</label>
+                    <select id="response-style" class="styled-select">
+                        <option value="concise">Concise</option>
+                        <option value="chatty">Detailed</option>
+                    </select>
+                </div>
+                
+                <!-- Voice Gender Selector -->
+                <div class="control-group">
+                    <label for="voice-gender">Voice:</label>
+                    <select id="voice-gender" class="styled-select">
+                        <option value="female">Female</option>
+                        <option value="male">Male</option>
+                    </select>
+                </div>
+                
+                <!-- Interaction Mode Selector -->
+                <div class="control-group">
+                    <label for="interaction-mode">Mode:</label>
+                    <select id="interaction-mode" class="styled-select">
+                        <option value="voice-audio">Speak + Listen</option>
+                        <option value="voice-text">Speak, Read Text</option>
+                        <option value="text-chat">Text Chat</option>
+                    </select>
+                </div>
+                
+                <!-- Theme Selector -->
+                <div class="control-group">
+                    <label for="theme-select">Theme:</label>
+                    <select id="theme-select" class="styled-select">
+                        <option value="emerald">Emerald Garden</option>
+                        <option value="sunset">Golden Harvest</option>
+                        <option value="ocean">Ocean Breeze</option>
+                        <option value="lavender">Lavender Fields</option>
+                        <option value="autumn">Autumn Glow</option>
+                        <option value="midnight">Midnight Sky</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main content area -->
+    <main class="main-container">
+        <!-- Left sidebar for contextual information -->
+        <aside class="info-sidebar" id="info-sidebar">
+            <div class="sidebar-header">
+                <svg 
+  width="24" 
+  height="24" 
+  viewBox="0 0 24 24" 
+  fill="none" 
+  stroke="#0ea5e9" 
+  stroke-width="2" 
+  stroke-linecap="round" 
+  stroke-linejoin="round" 
+  class="helpful-resources-icon">
+  
+  <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a2 2 0 0 1-.79-2.83 2 2 0 0 1-2.83-.79L14.7 6.3z"></path>
+  
+  <path d="M11 13a4 4 0 1 0-8 0 4 4 0 0 0 8 0z"></path>
+  <path d="M21 13H11"></path>
+  <path d="M18 13l3 3"></path>
+  <path d="M16 13l2 2"></path>
+</svg>
+                <h3>Helpful Resources</h3>
+            </div>
+            <div class="sidebar-content" id="sidebar-content">
+                <div class="welcome-message">
+                    <p style="font-size: 0.85rem; margin-bottom: 8px;">
+        <strong>Welcome! Ask me about:</strong>
+    </p>
+                    <ul class="resource-list">
+                        <li>
+                            <svg 
+  width="24" 
+  height="24" 
+  viewBox="0 0 24 24" 
+  fill="none" 
+  stroke="#166534" 
+  stroke-width="2" 
+  stroke-linecap="round" 
+  stroke-linejoin="round" 
+  class="crop-management-icon">
+  
+  <path d="M7 22v-6c0-2.2 1.8-4 4-4a4 4 0 0 1 4 4v6"></path>
+  
+  <path d="M11 22v-4c0-1.1.9-2 2-2a2 2 0 0 1 2 2v4"></path>
+  
+  <path d="M15 22v-2"></path>
+  
+  <line x1="3" y1="22" x2="21" y2="22"></line>
+  
+  <path d="M12 2a5 5 0 0 1 5 5c0 1.3-.5 2.5-1.5 3.5"></path>
+</svg>
+                            Crop management
+                        </li>
+                        <li>
+                            <svg 
+  width="24" 
+  height="24" 
+  viewBox="0 0 24 24" 
+  fill="none" 
+  stroke="#f97316" 
+  stroke-width="2" 
+  stroke-linecap="round" 
+  stroke-linejoin="round" 
+  class="pest-control-icon">
+  
+  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+  
+  <path d="M8 11h8"></path>
+  <path d="M10 8l-2-2"></path>
+  <path d="M14 8l2-2"></path>
+  <path d="M10 14l-2 2"></path>
+  <path d="M14 14l2 2"></path>
+  <circle cx="12" cy="11" r="3"></circle>
+</svg>
+                            Pest control
+                        </li>
+                        <li>
+                            <svg 
+  width="24" 
+  height="24" 
+  viewBox="0 0 24 24" 
+  fill="none" 
+  stroke="#1e3a8a" 
+  stroke-width="2" 
+  stroke-linecap="round" 
+  stroke-linejoin="round" 
+  class="gov-schemes-icon">
+  
+  <path d="M3 9l9-7 9 7"></path>
+  
+  <line x1="6" y1="20" x2="6" y2="11"></line>
+  <line x1="10" y1="20" x2="10" y2="11"></line>
+  <line x1="14" y1="20" x2="14" y2="11"></line>
+  <line x1="18" y1="20" x2="18" y2="11"></line>
+  
+  <line x1="3" y1="22" x2="21" y2="22"></line>
+</svg>
+                            Government schemes
+                        </li>
+                        <li>
+                            <svg 
+  width="24" 
+  height="24" 
+  viewBox="0 0 24 24" 
+  fill="none" 
+  stroke="#475569" 
+  stroke-width="2" 
+  stroke-linecap="round" 
+  stroke-linejoin="round" 
+  class="modern-farming-icon">
+  
+  <circle cx="5" cy="18" r="3"></circle>
+  
+  <circle cx="15" cy="18" r="2"></circle>
+  
+  <path d="M8 18h7"></path>
+  <path d="M5 15V9a2 2 0 0 1 2-2h4l3 3h4l1 1v7"></path>
+  
+  <path d="M11 7V5"></path>
+  
+  <path d="M7 11h4"></path>
+</svg>
+                            Modern farming tools
+                        </li>
+                        <li>
+                            <svg 
+  width="24" 
+  height="24" 
+  viewBox="0 0 24 24" 
+  fill="none" 
+  stroke="#78350f" 
+  stroke-width="2" 
+  stroke-linecap="round" 
+  stroke-linejoin="round" 
+  class="soil-health-icon">
+  
+  <path d="M2 18h20"></path>
+  
+  <path d="M4 21h16"></path>
+  <circle cx="6" cy="19.5" r="0.5" fill="currentColor"></circle>
+  <circle cx="12" cy="20" r="0.5" fill="currentColor"></circle>
+  <circle cx="18" cy="19.5" r="0.5" fill="currentColor"></circle>
+  
+  <path d="M12 18v-3"></path>
+  <path d="M12 18l-2 2"></path>
+  <path d="M12 18l2 2"></path>
+  
+  <path d="M12 15c0-3.31-2.69-6-6-6"></path>
+  <path d="M12 15c0-3.31 2.69-6 6-6"></path>
+  <path d="M12 15V11"></path>
+</svg>
+                            Soil health
+                        </li>
+                    </ul>
+                    <div class="weather-tip">
+                        <div class="tip-header">
+                            <svg 
+  width="24" 
+  height="24" 
+  viewBox="0 0 24 24" 
+  fill="none" 
+  stroke-width="2" 
+  stroke-linecap="round" 
+  stroke-linejoin="round" 
+  class="weather-forecast-icon">
+  
+  <path d="M12 2v2" stroke="#eab308"></path>
+  <path d="M12 20v2" stroke="#eab308"></path>
+  <path d="M4.93 4.93l1.41 1.41" stroke="#eab308"></path>
+  <path d="M17.66 17.66l1.41 1.41" stroke="#eab308"></path>
+  <path d="M2 12h2" stroke="#eab308"></path>
+  <path d="M20 12h2" stroke="#eab308"></path>
+  <path d="M6.34 17.66l-1.41 1.41" stroke="#eab308"></path>
+  <path d="M19.07 4.93l-1.41 1.41" stroke="#eab308"></path>
+  <circle cx="12" cy="12" r="4" stroke="#eab308"></circle>
+
+  <path d="M20 17.58A5 5 0 0 0 18 8h-1.26A8 8 0 1 0 4 16.25" fill="white" stroke="#0ea5e9"></path>
+</svg>
+<p style="font-size: 0.75rem; margin-bottom: 8px;">                           
+<strong>Weather Forecasts Available!</strong></p>
+                        </div>
+                        <p><strong>Switch to "Text Chat" mode</strong> (in the Mode dropdown above) to get accurate 24-hour weather predictions!</p>
+                        <p><em>Just type: "What's the weather in [your city] tomorrow?"</em></p>
+                        <p><em>Example: "Weather forecast for Bangalore"</em></p>
+                        <div class="warning-box" style="font-size: 12px; display: flex; align-items: center; gap: 8px;">
+                            <svg class="warning-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                                <line x1="12" y1="9" x2="12" y2="13"></line>
+                                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                            </svg>
+                            Weather forecasts only work in Text Chat mode. Voice modes cannot access real-time weather data.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Center chat area -->
+        <div class="chat-section">
+            <div id="status" class="status-bar disconnected">
+                <span class="status-icon">●</span>
+                <span class="status-text">Disconnected</span>
+            </div>
+            
+            <div id="chat-container" class="chat-container">
+                <div class="chat-welcome">
+                    <div class="welcome-icon"></div>
+                    <h2>Namaste! I'm your Farming Assistant</h2>
+                    <p>Select your language and click the microphone to start</p>
+                </div>
+            </div>
+            
+            <!-- Export Options Bar -->
+            <div class="export-options-bar">
+                <button id="download-pdf-btn" class="export-btn" title="Download Chat Transcript as PDF">
+                    <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                    <span class="btn-label">Download PDF</span>
+                </button>
+                
+                <button id="share-email-btn" class="export-btn" title="Share via Email">
+                    <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                        <polyline points="22,6 12,13 2,6"></polyline>
+                    </svg>
+                    <span class="btn-label">Email</span>
+                </button>
+                
+                <button id="share-whatsapp-btn" class="export-btn" title="Share via WhatsApp">
+                    <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+                    </svg>
+                    <span class="btn-label">WhatsApp</span>
+                </button>
+                
+                <button id="generate-qr-btn" class="export-btn" title="Generate QR Code">
+                    <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="3" width="7" height="7"></rect>
+                        <rect x="3" y="14" width="7" height="7"></rect>
+                        <rect x="14" y="14" width="7" height="7"></rect>
+                    </svg>
+                    <span class="btn-label">QR Code</span>
+                </button>
+            </div>
+
+            <!-- Voice controls -->
+            <div class="voice-controls">
+                <button id="microphone-btn" class="voice-btn mic-btn" title="Start/Stop Recording">
+                    <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                        <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                        <line x1="12" y1="19" x2="12" y2="23"></line>
+                        <line x1="8" y1="23" x2="16" y2="23"></line>
+                    </svg>
+                    <span class="btn-label">Speak</span>
+                </button>
+                <button id="disconnect-btn" class="voice-btn disconnect-btn" title="End Session" style="display: none;">
+                    <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                    <span class="btn-label">Disconnect</span>
+                </button>
+                <button id="mute-btn" class="voice-btn mute-btn" title="Mute/Unmute">
+                    <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                        <line x1="23" y1="9" x2="17" y2="15"></line>
+                        <line x1="17" y1="9" x2="23" y2="15"></line>
+                    </svg>
+                    <span class="btn-label">Mute</span>
+                </button>
+            </div>
+
+            <!-- Text chat input (hidden by default) -->
+            <div class="text-chat-input" id="text-chat-input" style="display: none;">
+                <textarea 
+                    id="text-input" 
+                    class="text-input-field" 
+                    placeholder="अपना संदेश यहाँ लिखें / Type your message here..."
+                    rows="3"
+                ></textarea>
+                <button id="send-text-btn" class="send-btn">
+                    <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="22" y1="2" x2="11" y2="13"></line>
+                        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                    </svg>
+                    <span class="btn-label">भेजें / Send</span>
+                </button>
+            </div>
+
+            <!-- Hidden legacy controls -->
+            <div id="controls" style="display: none;">
+                <button id="start" class="button">Start Streaming</button>
+                <button id="stop" class="button" disabled>Stop Streaming</button>
+            </div>
+        </div>
+
+        <!-- Right sidebar for images -->
+        <aside class="media-sidebar" id="media-sidebar">
+            <div class="sidebar-header">
+                <svg 
+  width="24" 
+  height="24" 
+  viewBox="0 0 24 24" 
+  fill="none" 
+  stroke="#0ea5e9" 
+  stroke-width="2" 
+  stroke-linecap="round" 
+  stroke-linejoin="round" 
+  class="visual-guide-icon">
+  
+  <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+  
+  <path d="M3 9h18"></path>
+  <path d="M9 21V9"></path>
+  
+  <circle cx="15" cy="15" r="3"></circle>
+  <path d="M15 12v.01"></path>
+  <path d="M15 18v.01"></path>
+  <path d="M12 15h.01"></path>
+  <path d="M18 15h.01"></path>
+</svg>
+                <h3>Visual Guide</h3>
+            </div>
+            <div class="media-content" id="media-content">
+                <div class="placeholder-image">
+                    <svg 
+  width="128" 
+  height="128" 
+  viewBox="0 0 24 24" 
+  fill="none" 
+  stroke="#2563eb" 
+  stroke-width="2" 
+  stroke-linecap="round" 
+  stroke-linejoin="round" 
+  class="visual-guide-icon">
+  
+  <path d="M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6z"></path>
+  
+  <line x1="8" y1="8" x2="12" y2="8"></line>
+  <line x1="8" y1="12" x2="16" y2="12"></line>
+  <line x1="8" y1="16" x2="14" y2="16"></line>
+  
+  <circle cx="17" cy="7" r="3"></circle>
+  <line x1="19" y1="9" x2="21" y2="11"></line>
+</svg>
+                    <p>Images and guides will appear here based on our conversation</p>
+                </div>
+            </div>
+        </aside>
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+        <p>
+            <svg 
+  class="footer-icon" 
+  viewBox="0 0 24 24" 
+  fill="#ef4444" 
+  stroke="#ef4444" 
+  stroke-width="2" 
+  stroke-linecap="round" 
+  stroke-linejoin="round"
+  width="24"
+  height="24">
+  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+</svg>
+            Empowering Indian Farmers with AI Technology with LOVE and RESPECT
+            <svg 
+  class="footer-icon" 
+  viewBox="0 0 24 24" 
+  fill="red" 
+  stroke="red" 
+  stroke-width="2" 
+  stroke-linecap="round" 
+  stroke-linejoin="round"
+  width="24"
+  height="24">
+  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+</svg>
+        </p>
+    </footer>
+    
+    <!-- QR Code Modal -->
+    <div id="qr-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="modal-close" id="close-qr-modal">&times;</span>
+            <h3>Scan QR Code to Download PDF</h3>
+            <div id="qr-code-container"></div>
+            <p class="modal-instruction">Scan this QR code with your phone to download the PDF</p>
+        </div>
+    </div>
+    
+    <!-- Help Modal -->
+    <div id="help-modal" class="help-modal" style="display: none;">
+        <div class="help-modal-content">
+            <div class="help-header">
+                <h2>Krishi Sahayak - User Guide | उपयोगकर्ता गाइड</h2>
+                <span class="modal-close" id="close-help-modal">&times;</span>
+            </div>
+            
+            <!-- Search Box -->
+            <div class="help-search-section">
+                <div class="help-welcome-note">
+                    <p><strong>Welcome to Krishi Sahayak Help Center!</strong> | <strong>कृषि सहायक सहायता केंद्र में आपका स्वागत है!</strong></p>
+                    <p>Explore the tabs below for detailed guides, tutorials, FAQs, features, and resources. | विस्तृत गाइड, ट्यूटोरियल, FAQs, सुविधाओं और संसाधनों के लिए नीचे दिए गए टैब देखें।</p>
+                </div>
+                <div class="search-box">
+                    <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <path d="m21 21-4.35-4.35"></path>
+                    </svg>
+                    <input type="text" id="farming-search" class="search-input" placeholder="Search farming topics... | खेती के विषय खोजें...">
+                    <button id="search-btn" class="search-btn">Search</button>
+                </div>
+                <p class="search-hint">Search for crops, pests, schemes, weather, and more | फसलों, कीटों, योजनाओं, मौसम और अधिक के लिए खोजें</p>
+            </div>
+            
+            <div class="help-content">
+                <!-- Navigation Tabs -->
+                <div class="help-tabs">
+                    <button class="help-tab active" data-tab="guide">Guide</button>
+                    <button class="help-tab" data-tab="tutorial">Interactive Tutorial</button>
+                    <button class="help-tab" data-tab="faq">FAQs</button>
+                    <button class="help-tab" data-tab="features">Features</button>
+                    <button class="help-tab" data-tab="resources">Resources</button>
+                </div>
+                
+                <!-- Tab Content -->
+                <div class="help-tab-content">
+                    <!-- Guide Tab -->
+                    <div class="tab-panel active" id="guide-panel">
+                        <div class="guide-section">
+                            <div class="guide-card">
+                                <div class="guide-icon">1</div>
+                                <h3>Getting Started | शुरुआत करना</h3>
+                                <p class="english">Welcome to Krishi Sahayak! This AI-powered assistant helps Indian farmers with expert advice on crops, pests, weather, and government schemes.</p>
+                                <p class="hindi">कृषि सहायक में आपका स्वागत है! यह AI-संचालित सहायक भारतीय किसानों को फसलों, कीटों, मौसम और सरकारी योजनाओं पर विशेषज्ञ सलाह देता है।</p>
+                            </div>
+                            
+                            <div class="guide-card">
+                                <div class="guide-icon">2</div>
+                                <h3>Select Your Language | अपनी भाषा चुनें</h3>
+                                <p class="english">Choose your preferred language from the dropdown: English, Hindi, Italian, French, German, or Spanish. The assistant will respond in your selected language.</p>
+                                <p class="hindi">ड्रॉपडाउन से अपनी पसंदीदा भाषा चुनें: अंग्रेजी, हिंदी, इतालवी, फ्रेंच, जर्मन, या स्पेनिश। सहायक आपकी चुनी हुई भाषा में जवाब देगा।</p>
+                            </div>
+                            
+                            <div class="guide-card">
+                                <div class="guide-icon">3</div>
+                                <h3>Choose Interaction Mode | इंटरैक्शन मोड चुनें</h3>
+                                <div class="mode-list">
+                                    <div class="mode-item">
+                                        <strong>Speak + Listen | बोलें + सुनें:</strong>
+                                        <p class="english">Talk to the assistant and hear responses (full voice conversation)</p>
+                                        <p class="hindi">सहायक से बात करें और जवाब सुनें (पूर्ण आवाज़ वार्तालाप)</p>
+                                    </div>
+                                    <div class="mode-item">
+                                        <strong>Speak, Read Text | बोलें, टेक्स्ट पढ़ें:</strong>
+                                        <p class="english">Speak your question, read the text response (for hearing-impaired users)</p>
+                                        <p class="hindi">अपना सवाल बोलें, टेक्स्ट जवाब पढ़ें (सुनने में कठिनाई वाले उपयोगकर्ताओं के लिए)</p>
+                                    </div>
+                                    <div class="mode-item">
+                                        <strong>Text Chat | टेक्स्ट चैट:</strong>
+                                        <p class="english">Type your questions and read text responses</p>
+                                        <p class="hindi">अपने सवाल टाइप करें और टेक्स्ट जवाब पढ़ें</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="guide-card">
+                                <div class="guide-icon">4</div>
+                                <h3>Response Style | उत्तर शैली</h3>
+                                <p class="english"><strong>Concise:</strong> Short, direct answers (1-2 sentences)<br><strong>Detailed:</strong> Comprehensive explanations with more context</p>
+                                <p class="hindi"><strong>संक्षिप्त:</strong> छोटे, सीधे जवाब (1-2 वाक्य)<br><strong>विस्तृत:</strong> अधिक संदर्भ के साथ व्यापक स्पष्टीकरण</p>
+                            </div>
+                            
+                            <div class="guide-card">
+                                <div class="guide-icon">5</div>
+                                <h3>Voice Gender | आवाज़ लिंग</h3>
+                                <p class="english">Choose between Male or Female voice for audio responses.</p>
+                                <p class="hindi">ऑडियो प्रतिक्रियाओं के लिए पुरुष या महिला आवाज़ के बीच चुनें।</p>
+                            </div>
+                            
+                            <div class="guide-card">
+                                <div class="guide-icon">6</div>
+                                <h3>Themes | थीम</h3>
+                                <p class="english">Personalize your experience with 6 beautiful themes: Emerald Garden, Golden Harvest, Ocean Breeze, Lavender Fields, Autumn Glow, and Midnight Sky.</p>
+                                <p class="hindi">6 सुंदर थीम के साथ अपने अनुभव को व्यक्तिगत बनाएं: एमराल्ड गार्डन, गोल्डन हार्वेस्ट, ओशन ब्रीज़, लैवेंडर फील्ड्स, ऑटम ग्लो, और मिडनाइट स्काई।</p>
+                            </div>
+                            
+                            <div class="guide-card highlight">
+                                <div class="guide-icon">7</div>
+                                <h3>Helpful Resources Section | सहायक संसाधन अनुभाग</h3>
+                                <p class="english">As you chat, the left sidebar automatically shows relevant government schemes, articles, and helpful links based on your conversation topics (pests, crops, soil, water, fertilizers, schemes, weather, diseases).</p>
+                                <p class="hindi">जैसे ही आप चैट करते हैं, बाईं साइडबार स्वचालित रूप से आपकी बातचीत के विषयों (कीट, फसलें, मिट्टी, पानी, उर्वरक, योजनाएं, मौसम, बीमारियां) के आधार पर प्रासंगिक सरकारी योजनाएं, लेख और सहायक लिंक दिखाती है।</p>
+                            </div>
+                            
+                            <div class="guide-card highlight">
+                                <div class="guide-icon">8</div>
+                                <h3>Visual Guide | दृश्य गाइड</h3>
+                                <p class="english">The right sidebar displays relevant images and visual guides related to your conversation topics, helping you better understand farming concepts.</p>
+                                <p class="hindi">दाईं साइडबार आपकी बातचीत के विषयों से संबंधित प्रासंगिक चित्र और दृश्य गाइड प्रदर्शित करती है, जो आपको खेती की अवधारणाओं को बेहतर ढंग से समझने में मदद करती है।</p>
+                            </div>
+                            
+                            <div class="guide-card highlight">
+                                <div class="guide-icon">9</div>
+                                <h3>Download & Share Conversation | बातचीत डाउनलोड और साझा करें</h3>
+                                <p class="english">Save your conversation for future reference:</p>
+                                <ul class="english">
+                                    <li><strong>Download PDF:</strong> Get a complete transcript with timestamps, resources, and images</li>
+                                    <li><strong>Email:</strong> Share via Gmail</li>
+                                    <li><strong>WhatsApp:</strong> Share summary on WhatsApp</li>
+                                    <li><strong>QR Code:</strong> Generate QR code to download on mobile</li>
+                                </ul>
+                                <p class="hindi">भविष्य के संदर्भ के लिए अपनी बातचीत सहेजें:</p>
+                                <ul class="hindi">
+                                    <li><strong>PDF डाउनलोड करें:</strong> टाइमस्टैम्प, संसाधनों और चित्रों के साथ पूर्ण प्रतिलेख प्राप्त करें</li>
+                                    <li><strong>ईमेल:</strong> Gmail के माध्यम से साझा करें</li>
+                                    <li><strong>WhatsApp:</strong> WhatsApp पर सारांश साझा करें</li>
+                                    <li><strong>QR कोड:</strong> मोबाइल पर डाउनलोड करने के लिए QR कोड जेनरेट करें</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Interactive Tutorial Tab -->
+                    <div class="tab-panel" id="tutorial-panel">
+                        <div class="tutorial-section">
+                            <h3 class="tutorial-title">Interactive Tutorial | इंटरैक्टिव ट्यूटोरियल</h3>
+                            <p class="tutorial-intro">Follow these animated steps to learn how to use Krishi Sahayak | कृषि सहायक का उपयोग करना सीखने के लिए इन एनिमेटेड चरणों का पालन करें</p>
+                            
+                            <div class="tutorial-steps">
+                                <div class="tutorial-step">
+                                    <div class="step-animation">
+                                        <div class="animated-screen">
+                                            <div class="screen-header"></div>
+                                            <div class="screen-dropdown pulse"></div>
+                                            <div class="screen-content"></div>
+                                        </div>
+                                    </div>
+                                    <div class="step-description">
+                                        <h4>Step 1: Select Language | चरण 1: भाषा चुनें</h4>
+                                        <p class="english">Click on the language dropdown at the top and choose your preferred language.</p>
+                                        <p class="hindi">शीर्ष पर भाषा ड्रॉपडाउन पर क्लिक करें और अपनी पसंदीदा भाषा चुनें।</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="tutorial-step">
+                                    <div class="step-animation">
+                                        <div class="animated-screen">
+                                            <div class="screen-header"></div>
+                                            <div class="screen-mic pulse-mic">
+                                                <div class="mic-icon"></div>
+                                            </div>
+                                            <div class="sound-waves">
+                                                <span></span>
+                                                <span></span>
+                                                <span></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="step-description">
+                                        <h4>Step 2: Click Speak Button | चरण 2: बोलें बटन क्लिक करें</h4>
+                                        <p class="english">Click the purple "Speak" button and start talking about your farming questions.</p>
+                                        <p class="hindi">बैंगनी "बोलें" बटन पर क्लिक करें और अपने खेती के सवालों के बारे में बात करना शुरू करें।</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="tutorial-step">
+                                    <div class="step-animation">
+                                        <div class="animated-screen">
+                                            <div class="screen-header"></div>
+                                            <div class="chat-bubbles">
+                                                <div class="bubble user-bubble slide-in-right"></div>
+                                                <div class="bubble assistant-bubble slide-in-left"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="step-description">
+                                        <h4>Step 3: Get AI Response | चरण 3: AI प्रतिक्रिया प्राप्त करें</h4>
+                                        <p class="english">The AI assistant will understand your question and provide expert farming advice.</p>
+                                        <p class="hindi">AI सहायक आपके सवाल को समझेगा और विशेषज्ञ खेती सलाह प्रदान करेगा।</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="tutorial-step">
+                                    <div class="step-animation">
+                                        <div class="animated-screen">
+                                            <div class="screen-sidebar">
+                                                <div class="sidebar-item fade-in"></div>
+                                                <div class="sidebar-item fade-in" style="animation-delay: 0.2s;"></div>
+                                                <div class="sidebar-item fade-in" style="animation-delay: 0.4s;"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="step-description">
+                                        <h4>Step 4: View Resources | चरण 4: संसाधन देखें</h4>
+                                        <p class="english">Helpful resources and images appear automatically in the sidebars based on your conversation.</p>
+                                        <p class="hindi">आपकी बातचीत के आधार पर साइडबार में सहायक संसाधन और चित्र स्वचालित रूप से दिखाई देते हैं।</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="tutorial-step">
+                                    <div class="step-animation">
+                                        <div class="animated-screen">
+                                            <div class="screen-header"></div>
+                                            <div class="download-buttons">
+                                                <div class="btn-icon pulse"></div>
+                                                <div class="btn-icon pulse" style="animation-delay: 0.2s;"></div>
+                                                <div class="btn-icon pulse" style="animation-delay: 0.4s;"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="step-description">
+                                        <h4>Step 5: Download & Share | चरण 5: डाउनलोड और साझा करें</h4>
+                                        <p class="english">Save your conversation as PDF or share via Email, WhatsApp, or QR Code for future reference.</p>
+                                        <p class="hindi">भविष्य के संदर्भ के लिए अपनी बातचीत को PDF के रूप में सहेजें या ईमेल, WhatsApp, या QR कोड के माध्यम से साझा करें।</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- FAQ Tab -->
+                    <div class="tab-panel" id="faq-panel">
+                        <div class="faq-section">
+                            <div class="faq-item">
+                                <div class="faq-question">
+                                    <h4>How do I start a conversation? | मैं बातचीत कैसे शुरू करूं?</h4>
+                                    <span class="faq-toggle">+</span>
+                                </div>
+                                <div class="faq-answer">
+                                    <p class="english">Click the "Speak" button and start talking. The assistant will listen and respond. For text mode, type your question in the text box and click "Send".</p>
+                                    <p class="hindi">"बोलें" बटन पर क्लिक करें और बात करना शुरू करें। सहायक सुनेगा और जवाब देगा। टेक्स्ट मोड के लिए, टेक्स्ट बॉक्स में अपना सवाल टाइप करें और "भेजें" पर क्लिक करें।</p>
+                                </div>
+                            </div>
+                            
+                            <div class="faq-item">
+                                <div class="faq-question">
+                                    <h4>What topics can I ask about? | मैं किन विषयों के बारे में पूछ सकता हूं?</h4>
+                                    <span class="faq-toggle">+</span>
+                                </div>
+                                <div class="faq-answer">
+                                    <p class="english">You can ask about: Crop management, Pest control, Soil health, Weather advice, Government schemes (PM-KISAN, Crop Insurance, etc.), Modern farming tools, Organic farming, Water management, Market strategies, and more!</p>
+                                    <p class="hindi">आप इनके बारे में पूछ सकते हैं: फसल प्रबंधन, कीट नियंत्रण, मिट्टी स्वास्थ्य, मौसम सलाह, सरकारी योजनाएं (PM-KISAN, फसल बीमा, आदि), आधुनिक खेती उपकरण, जैविक खेती, जल प्रबंधन, बाजार रणनीतियां, और भी बहुत कुछ!</p>
+                                </div>
+                            </div>
+                            
+                            <div class="faq-item">
+                                <div class="faq-question">
+                                    <h4>Is my conversation saved? | क्या मेरी बातचीत सहेजी जाती है?</h4>
+                                    <span class="faq-toggle">+</span>
+                                </div>
+                                <div class="faq-answer">
+                                    <p class="english">Your conversation is stored locally in your browser during the session. You can download it as PDF for future reference. We don't store your conversations on our servers.</p>
+                                    <p class="hindi">आपकी बातचीत सत्र के दौरान आपके ब्राउज़र में स्थानीय रूप से संग्रहीत होती है। आप इसे भविष्य के संदर्भ के लिए PDF के रूप में डाउनलोड कर सकते हैं। हम आपकी बातचीत को अपने सर्वर पर संग्रहीत नहीं करते हैं।</p>
+                                </div>
+                            </div>
+                            
+                            <div class="faq-item">
+                                <div class="faq-question">
+                                    <h4>Can I change language mid-conversation? | क्या मैं बातचीत के बीच में भाषा बदल सकता हूं?</h4>
+                                    <span class="faq-toggle">+</span>
+                                </div>
+                                <div class="faq-answer">
+                                    <p class="english">Yes! Select a new language from the dropdown. The change will take effect in your next conversation session.</p>
+                                    <p class="hindi">हां! ड्रॉपडाउन से एक नई भाषा चुनें। परिवर्तन आपके अगले बातचीत सत्र में प्रभावी होगा।</p>
+                                </div>
+                            </div>
+                            
+                            <div class="faq-item">
+                                <div class="faq-question">
+                                    <h4>Why are resources not showing? | संसाधन क्यों नहीं दिख रहे हैं?</h4>
+                                    <span class="faq-toggle">+</span>
+                                </div>
+                                <div class="faq-answer">
+                                    <p class="english">Resources appear automatically when you discuss specific topics like pests, crops, soil, water, fertilizers, schemes, weather, or diseases. Start a conversation about these topics to see relevant resources.</p>
+                                    <p class="hindi">जब आप कीट, फसलें, मिट्टी, पानी, उर्वरक, योजनाएं, मौसम, या बीमारियों जैसे विशिष्ट विषयों पर चर्चा करते हैं तो संसाधन स्वचालित रूप से दिखाई देते हैं। प्रासंगिक संसाधन देखने के लिए इन विषयों पर बातचीत शुरू करें।</p>
+                                </div>
+                            </div>
+                            
+                            <div class="faq-item">
+                                <div class="faq-question">
+                                    <h4>How do I use the QR code? | मैं QR कोड का उपयोग कैसे करूं?</h4>
+                                    <span class="faq-toggle">+</span>
+                                </div>
+                                <div class="faq-answer">
+                                    <p class="english">Click "QR Code" button, then scan the displayed QR code with your phone's camera. It will open the application page where you can access your conversation.</p>
+                                    <p class="hindi">"QR कोड" बटन पर क्लिक करें, फिर अपने फोन के कैमरे से प्रदर्शित QR कोड को स्कैन करें। यह एप्लिकेशन पेज खोलेगा जहां आप अपनी बातचीत तक पहुंच सकते हैं।</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Features Tab -->
+                    <div class="tab-panel" id="features-panel">
+                        <div class="features-grid">
+                            <div class="feature-card">
+                                <div class="feature-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                                        <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                                    </svg>
+                                </div>
+                                <h4>Voice Interaction</h4>
+                                <p>Natural voice conversations with AI assistant</p>
+                            </div>
+                            
+                            <div class="feature-card">
+                                <div class="feature-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                        <polyline points="7 10 12 15 17 10"></polyline>
+                                    </svg>
+                                </div>
+                                <h4>PDF Export</h4>
+                                <p>Download complete conversation transcripts</p>
+                            </div>
+                            
+                            <div class="feature-card">
+                                <div class="feature-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="11" cy="11" r="8"></circle>
+                                        <path d="m21 21-4.35-4.35"></path>
+                                    </svg>
+                                </div>
+                                <h4>Smart Search</h4>
+                                <p>Search farming topics instantly</p>
+                            </div>
+                            
+                            <div class="feature-card">
+                                <div class="feature-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                        <line x1="3" y1="9" x2="21" y2="9"></line>
+                                    </svg>
+                                </div>
+                                <h4>Visual Guides</h4>
+                                <p>Contextual images and resources</p>
+                            </div>
+                            
+                            <div class="feature-card">
+                                <div class="feature-icon">
+                                    <svg viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+                                    </svg>
+                                </div>
+                                <h4>Easy Sharing</h4>
+                                <p>Share via Email, WhatsApp, QR Code</p>
+                            </div>
+                            
+                            <div class="feature-card">
+                                <div class="feature-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="12" cy="12" r="10"></circle>
+                                        <polyline points="12 6 12 12 16 14"></polyline>
+                                    </svg>
+                                </div>
+                                <h4>24/7 Available</h4>
+                                <p>Get farming advice anytime, anywhere</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Resources Tab -->
+                    <div class="tab-panel" id="resources-panel">
+                        <div class="resources-section">
+                            <h3>Useful Links | उपयोगी लिंक</h3>
+                            
+                            <div class="resource-category">
+                                <h4>Government Schemes | सरकारी योजनाएं</h4>
+                                <ul class="resource-links">
+                                    <li><a href="https://pmkisan.gov.in/" target="_blank">PM-KISAN Scheme</a></li>
+                                    <li><a href="https://pmfby.gov.in/" target="_blank">Pradhan Mantri Fasal Bima Yojana</a></li>
+                                    <li><a href="https://pmksy.gov.in/" target="_blank">PM Krishi Sinchayee Yojana</a></li>
+                                    <li><a href="https://soilhealth.dac.gov.in/" target="_blank">Soil Health Card Scheme</a></li>
+                                </ul>
+                            </div>
+                            
+                            <div class="resource-category">
+                                <h4>Agricultural Departments | कृषि विभाग</h4>
+                                <ul class="resource-links">
+                                    <li><a href="https://agricoop.nic.in/" target="_blank">Department of Agriculture & Cooperation</a></li>
+                                    <li><a href="https://farmer.gov.in/" target="_blank">Farmer Portal</a></li>
+                                    <li><a href="https://mkisan.gov.in/" target="_blank">mKisan Portal</a></li>
+                                </ul>
+                            </div>
+                            
+                            <div class="resource-category">
+                                <h4>Weather & Advisory | मौसम और सलाह</h4>
+                                <ul class="resource-links">
+                                    <li><a href="https://mausam.imd.gov.in/" target="_blank">India Meteorological Department</a></li>
+                                    <li><a href="https://www.fao.org/" target="_blank">Food and Agriculture Organization</a></li>
+                                </ul>
+                            </div>
+                            
+                            <div class="resource-category">
+                                <h4>Market Information | बाजार जानकारी</h4>
+                                <ul class="resource-links">
+                                    <li><a href="https://agmarknet.gov.in/" target="_blank">AGMARKNET - Market Prices</a></li>
+                                    <li><a href="https://enam.gov.in/" target="_blank">e-NAM Portal</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+    <!-- QR Code Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</body>
+
+</html>
