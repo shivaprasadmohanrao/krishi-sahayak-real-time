@@ -589,8 +589,6 @@
       │                                           │    ✓ Auto-scaling   │
       │<──────────────────────────────────────────────────────────────────
       │ 10. Access Application
-      │     https://g7rkxv4szn.us-east-1.awsapprunner.com
-```
 
 ### 4.3 Pause/Resume Operations
 
@@ -1037,15 +1035,15 @@ docker build -t krishi-sahayak .
 
 # Tag for ECR
 docker tag krishi-sahayak:latest \
-  772770127418.dkr.ecr.us-east-1.amazonaws.com/krishi-sahayak:latest
+  .dkr.ecr.us-east-1.amazonaws.com/krishi-sahayak:latest
 
 # Authenticate with ECR
 aws ecr get-login-password --region us-east-1 | \
   docker login --username AWS --password-stdin \
-  772770127418.dkr.ecr.us-east-1.amazonaws.com
+  .dkr.ecr.us-east-1.amazonaws.com
 
 # Push to ECR
-docker push 772770127418.dkr.ecr.us-east-1.amazonaws.com/krishi-sahayak:latest
+docker push xxxxx.amazonaws.com/krishi-sahayak:latest
 ```
 
 ### Manage App Runner Service
@@ -1069,15 +1067,15 @@ aws apprunner describe-service \
 ### Health Checks
 ```bash
 # Check application health
-curl https://g7rkxv4szn.us-east-1.awsapprunner.com/health
+curl https://XXXXXXXX.us-east-1.awsapprunner.com/health
 
 # Test weather API
-curl "https://g7rkxv4szn.us-east-1.awsapprunner.com/test-weather?location=Bangalore"
+curl "https://XXXXXX.awsapprunner.com/test-weather?location=Bangalore"
 ```
 
 ---
 
 **Document Version**: 1.0  
 **Last Updated**: 2025  
-**Application URL**: https://g7rkxv4szn.us-east-1.awsapprunner.com  
+**Application URL**: https://XXXXXXX.awsapprunner.com  
 **Repository**: krishi-sahayak
