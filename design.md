@@ -136,7 +136,7 @@ The application is containerized with Docker (Node.js 20 Alpine) and deployed to
 - **CPU**: 1 vCPU
 - **Memory**: 2 GB
 - **Auto-scaling**: Enabled
-- **HTTPS URL**: https://g7rkxv4szn.us-east-1.awsapprunner.com
+- **HTTPS URL**: https://xxxxxx.us-east-1.awsapprunner.com
 
 **Environment Variables:**
 ```
