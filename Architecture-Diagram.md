@@ -564,13 +564,13 @@
       │                                           │                     │
       │ 3. Tag Image                              │                     │
       │    docker tag krishi-sahayak:latest \    │                     │
-      │    772770127418.dkr.ecr.us-east-1...     │                     │
+      │    .dkr.ecr.us-east-1...     │                     │
       │                                           │                     │
       │ 4. Authenticate with ECR                  │                     │
       │    aws ecr get-login-password...         │                     │
       │                                           │                     │
       │ 5. Push to ECR ──────────────────────────>│                     │
-      │    docker push 772770127418...            │                     │
+      │    docker push ...            │                     │
       │                                           │                     │
       │                                           │ 6. Trigger Deploy   │
       │                                           │    (Manual or Auto) │
