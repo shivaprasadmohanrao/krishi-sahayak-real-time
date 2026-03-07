@@ -474,7 +474,7 @@
 │                         AWS APP RUNNER                                   │
 │  Service: krishi-sahayak                                                 │
 │  Region: us-east-1                                                       │
-│  URL: https://g7rkxv4szn.us-east-1.awsapprunner.com                     │
+│  URL: https://xxxxxx.us-east-1.awsapprunner.com                     │
 │                                                                          │
 │  ┌────────────────────────────────────────────────────────────────┐    │
 │  │                    AUTOMATIC FEATURES                           │    │
