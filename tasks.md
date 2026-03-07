@@ -38,7 +38,7 @@ All core implementation tasks have been completed. Optional property-based testi
   
   - [x] 1.5 Configure automatic HTTPS
     - App Runner provides automatic HTTPS at service URL
-    - URL: https://g7rkxv4szn.us-east-1.awsapprunner.com
+   URL: https://xxxxxxx.us-east-1.awsapprunner.com
     - SSL certificates managed automatically
     - _Requirements: 11.2_
   
