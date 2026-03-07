@@ -633,7 +633,7 @@ All core implementation tasks have been completed. Optional property-based testi
 
 - [x] 17. Checkpoint - Production deployment complete
   - All core features implemented and deployed
-  - Application accessible at https://g7rkxv4szn.us-east-1.awsapprunner.com
+  - Application accessible at https://.us-east-1.awsapprunner.com
   - Optional property-based testing tasks remain for future enhancement
 
 ## Notes
