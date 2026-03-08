@@ -27,6 +27,10 @@ Indian agriculture faces a critical knowledge accessibility crisis:
 
 ---
 
+##Architecture Diagram##
+<img width="2144" height="701" alt="image" src="https://github.com/user-attachments/assets/f5eb777f-112b-47df-bdfb-f71baba3050f" />
+
+
 ## Our Solution
 
 Krishi Sahayak is a comprehensive, cloud-native farming assistant that combines cutting-edge AI with deep agricultural domain expertise, delivered through an accessible, voice-first interface designed specifically for Indian farmers.
