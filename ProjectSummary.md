@@ -1145,6 +1145,14 @@ This project demonstrates expertise in:
 - **Domain expertise** (Indian agriculture, farmer needs)
 
 ---
+##Sequence Diagram##
+<img width="599" height="304" alt="image" src="https://github.com/user-attachments/assets/1e024f78-d050-41f3-9d20-6d80e17c9778" />
+
+<img width="1115" height="995" alt="image" src="https://github.com/user-attachments/assets/9e9892c5-1f37-4062-ae37-f496e83f7e6f" />
+
+<img width="3320" height="1646" alt="image" src="https://github.com/user-attachments/assets/5927d0ba-8795-4a56-9ee5-2c076813dabd" />
+
+---
 
 ## Conclusion
 
